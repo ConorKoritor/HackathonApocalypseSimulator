@@ -33,7 +33,7 @@ function hexmap(tick) {
 
     var hexbin = d3.hexbin()
         .size([opts.width, opts.height])
-        .radius(5);
+        .radius(1.66666666667);
 
     var color = d3.scaleLinear() // Update to d3.scaleLinear for D3 v5+
         .domain([1, 255])
@@ -101,7 +101,7 @@ function hexmap(tick) {
                     .data(hexagons)
                     .enter()
                     .append('path')
-                    .attr('d', hexbin.hexagon(4.5))
+                    .attr('d', hexbin.hexagon(1.5))
                     .attr('transform', function (d) {
                         return 'translate(' + d.x + ',' + d.y + ')';
                     })
@@ -110,13 +110,22 @@ function hexmap(tick) {
                             d,
                             tick
                         )
+                        // this is colouring only land
                         if(d.mean > 0){
+                            // define infected area
+                            var epicenter_x = 100;
+                            var epicenter_y = 100;
+                            var time_passed = 3;
+                            var spread_rate = 3 * time_passed;
 
-                            // this is colouring only land
+                            // colour infected area
+                            var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
 
-                            return color(d.mean+tick*10);
+                            if (distance <= spread_rate) {
+                                return '#FF0000'; // Inside the infected area (circle)
+                            }
 
-
+                            return color(d.mean+100);
                         }
                         return color(0);
                     });
