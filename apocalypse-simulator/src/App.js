@@ -19,8 +19,6 @@ function App() {
       .scale(150)
       .translate([width / 2, height / 1.5]);
 
-    const path = d3.geoPath().projection(projection);
-
     d3.json("https://unpkg.com/world-atlas@1/world/110m.json").then(world => {
       const countries = topojson.feature(world, world.objects.countries).features;
 
@@ -40,13 +38,44 @@ function App() {
         });
       };
 
+      // Filter hexagons that are on land
+      const landHexagons = hexbinData.filter(d => isLand([d.x, d.y]));
+
+      // Select 5 random hexagons from the land hexagons
+      const randomHexagons = d3.shuffle(landHexagons).slice(0, 5);
+
+      // Add more red hexagons
+      const addRedHexagons = (count) => {
+        while (count > 0) {
+          const newRedHex = d3.shuffle(landHexagons).find(d => !randomHexagons.includes(d));
+          if (newRedHex) {
+            randomHexagons.push(newRedHex);
+            count--;
+          }
+        }
+      };
+
+      // Add initial 5 red hexagons
+      addRedHexagons(5);
+
+      let redHexagonCount = 5;
+
+      // Add red hexagons every 100 milliseconds, doubling the count each time
+      setInterval(() => {
+        redHexagonCount *= 2;
+        addRedHexagons(redHexagonCount);
+        svg.selectAll("path")
+          .data(hexbinData)
+          .attr("fill", d => randomHexagons.includes(d) ? "red" : (isLand([d.x, d.y]) ? "green" : "blue"));
+      }, 100);
+
       svg.append("g")
         .selectAll("path")
         .data(hexbinData)
         .enter().append("path")
         .attr("d", hexbinGenerator.hexagon())
         .attr("transform", d => `translate(${d.x},${d.y})`)
-        .attr("fill", d => isLand([d.x, d.y]) ? "green" : "blue")
+        .attr("fill", d => randomHexagons.includes(d) ? "red" : (isLand([d.x, d.y]) ? "green" : "blue"))
         .attr("stroke", "black");
     });
   }, []);
