@@ -1,14 +1,25 @@
-let chart = hexmap();
+
+
+
+let tick = 0;
 
 // Apply the chart to the DOM
-d3.select('#vis')
-    .call(chart);
 
-function hexmap() {
+setInterval(() => {
+    tick += 1;
+    d3.select('#vis').selectAll('svg').remove();
+    console.log("deleted");
+    d3.select('#vis')
+    .call(hexmap(tick));
+    console.log("created");
+}, 10000)
+
+
+function hexmap(tick) {
     //________________________________________________
     // GET/SET defaults
     //________________________________________________
-
+    
     // Private variables
     var svg = undefined;
     var dispatch = d3.dispatch('customHover');
@@ -96,18 +107,22 @@ function hexmap() {
                     })
                     .style('fill', function (d) {
                         console.log(
-                            d
+                            d,
+                            tick
                         )
                         if(d.mean > 0){
 
                             // this is colouring only land
 
-                            return color(d.mean+100);
+                            return color(d.mean+tick*10);
 
 
                         }
                         return color(0);
                     });
+
+
+                    
             })
             .catch(function (error) {
                 console.error('Error loading the world data:', error);
@@ -116,4 +131,5 @@ function hexmap() {
 
     // Export the function
     return exports;
+
 }
