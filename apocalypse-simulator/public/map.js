@@ -1,0 +1,1 @@
+console.log("Hello from map.js!"); // This line verifies that map.js has loaded
