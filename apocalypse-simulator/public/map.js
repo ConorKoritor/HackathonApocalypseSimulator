@@ -1,10 +1,11 @@
 let tick = 0;
+let infectedHexagons = new Set(); // Track infected hexagons
 
 // Apply the chart to the DOM
 setInterval(() => {
     tick += 1;
     d3.select('#vis').call(hexmap(tick));
-}, 100);
+}, 100); // Update every 100 milliseconds
 
 function hexmap(tick) {
     //________________________________________________
@@ -129,19 +130,25 @@ function hexmap(tick) {
     function getColor(d, tick) {
         // Only color land
         if (d.mean > 0) {
-            // Define infected area
+            // Define infected area with some randomness
             var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
             var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
             var time_passed = 1 * tick;
-            var spread_rate = 2 * time_passed;
+            var spread_rate = 5 * time_passed; // Increased spread rate
 
-            // Add randomness to the distance
+            // Calculate distance from the hexagon to the randomized epicenter
             var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
             var randomVariation = Math.random() * 30; // Random spread variation
 
             // Calculate effective distance with randomness
             if (distance <= spread_rate + randomVariation) {
+                infectedHexagons.add(d); // Add to infected set
                 return '#FF0000'; // Inside the infected area (irregular circle)
+            }
+
+            // If already infected, return red
+            if (infectedHexagons.has(d)) {
+                return '#FF0000'; // Already infected
             }
 
             return color(d.mean + 100);
