@@ -146,7 +146,7 @@ function hexmap(tick) {
                     var epicenter_x = epicenters[i][0] + (Math.random() - 0.5) * 20; // Randomize epicenter x
                     var epicenter_y = epicenters[i][1] + (Math.random() - 0.5) * 20; // Randomize epicenter y
                     var time_passed = 1 * epicenters[i][2];
-                    var spread_rate = 2 * time_passed;
+                    var spread_rate = generateSpreadRate(epicenter_x, epicenter_y) * time_passed; // Spread rate
 
                     // Calculate distance from the hexagon to the randomized epicenter
                     var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
@@ -178,4 +178,65 @@ function determineEpicenters(epicenters){
     }
 
     return epicenters;
+}
+
+function generateSpreadRate(epicenter_x, epicenter_y){
+    var spread_rate;
+
+    var grid_position_x;
+    var grid_position_y;
+
+    grid_x = [];
+    grid_y = []; 
+
+    for(var i = 1; i <= 14; i++){
+        grid_x.push(i * (960 / 12));
+    }
+    for(var i = 1; i <= 7; i++){
+        grid_y.push(i * (500 / 12));
+    }
+
+    for(var i = 0; i < grid_x.length; i++){
+        if(epicenter_x <= grid_x[i]){
+            var grid_position_x = i;
+            break;
+        }
+    }
+
+    for(var i = 0; i < grid_y.length; i++){
+        if(epicenter_y <= grid_y[i]){
+            var grid_position_y = i;
+            break;
+        }
+    }
+
+    //Very Far North
+    if(grid_position_y <= 2){
+        spread_rate = 1.2;
+    }
+    //US/CANADA
+    else if( grid_position_x >= 3 && grid_position_x <= 5 && grid_position_y >= 3 && grid_position_y <= 4 ){
+        spread_rate = 3;
+    }
+    //South America
+    else if( grid_position_x >= 4 && grid_position_x <= 6 && grid_position_y >= 5 && grid_position_y <= 7 ){
+        spread_rate = 5;
+    }
+    //Europe
+    else if( grid_position_x >= 7 && grid_position_x <= 9 && grid_position_y >= 3 && grid_position_y <= 4 ){
+        spread_rate = 4;
+    }
+    //Africa
+    else if( grid_position_x >= 7 && grid_position_x <= 9 && grid_position_y >= 4 && grid_position_y <= 6 ){
+        spread_rate = 5;
+    }
+    //SE Asia and China
+    else if( grid_position_x >= 9 && grid_position_x <= 12 && grid_position_y >= 3 && grid_position_y <= 5 ){
+        spread_rate = 6;
+    }
+    //Australia
+    else if( grid_position_x >= 12 && grid_position_x <= 13 && grid_position_y >= 6 && grid_position_y <= 7 ){
+        spread_rate = 2;
+    }
+    return spread_rate;
 }
