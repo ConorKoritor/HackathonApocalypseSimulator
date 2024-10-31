@@ -1,4 +1,5 @@
 let tick = 0;
+let infectedHexagons = new Set(); // Track infected hexagons
 var epicenters = [];
 epicenters.push([100, 100]);
 
@@ -6,7 +7,7 @@ epicenters.push([100, 100]);
 setInterval(() => {
     tick += 1;
     d3.select('#vis').call(hexmap(tick));
-}, 100);
+}, 100); // Update every 100 milliseconds
 
 function hexmap(tick) {
     //________________________________________________
@@ -25,7 +26,7 @@ function hexmap(tick) {
 
     var hexbin = d3.hexbin()
         .size([opts.width, opts.height])
-        .radius(0.83333333333);
+        .radius(1.66666666666);
 
     var color = d3.scaleLinear()
         .domain([1, 255])
@@ -108,7 +109,7 @@ function hexmap(tick) {
                 hexagonGroup.enter()
                     .append('path')
                     .attr('class', 'hexagons')
-                    .attr('d', hexbin.hexagon(.75))
+                    .attr('d', hexbin.hexagon(1.5))
                     .style('fill', function (d) {
                         return getColor(d, tick);
                     })
@@ -131,27 +132,21 @@ function hexmap(tick) {
     function getColor(d, tick) {
         // Only color land
         if (d.mean > 0) {
-            //Determine Epicenters
-            epicenters = determineEpicenters(epicenters);
-
             // Define infected area
-            epicenters.forEach(function (epicenter) {
-
-            var epicenter_x = epicenter[0]; //random epicenter x
-            var epicenter_y = epicenter[1]; //random epicenter y
+            var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
+            var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
             var time_passed = 1 * tick;
             var spread_rate = 2 * time_passed;
 
-
-            // Add randomness to the distance
+            // Calculate distance from the hexagon to the randomized epicenter
             var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
             var randomVariation = Math.random() * 30; // Random spread variation
 
             // Calculate effective distance with randomness
             if (distance <= spread_rate + randomVariation) {
+                infectedHexagons.add(d); // Add to infected set
                 return '#FF0000'; // Inside the infected area (irregular circle)
             }
-        });
 
             return color(d.mean + 100);
         }
