@@ -160,7 +160,7 @@ function hexmap(tick) {
                     var epicenter_x = epicenters[i][0] + (Math.random() - 0.5) * 20; // Randomize epicenter x
                     var epicenter_y = epicenters[i][1] + (Math.random() - 0.5) * 20; // Randomize epicenter y
                     var time_passed = 1 * epicenters[i][2];
-                    var spread_rate = 20 * time_passed;
+                    var spread_rate = 2 * time_passed;
 
                     // Calculate distance from the hexagon to the randomized epicenter
                     var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
