@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 class App extends Component {
-    // Dynamically add the script in componentDidMount
+    // Dynamically add the script in App.js
     componentDidMount() {
         const script = document.createElement("script");
         script.src = "/map.js"; // Assuming map.js is in the public folder
@@ -12,7 +12,7 @@ class App extends Component {
     render() {
         return (
             <div>
-                <h1>Hello, World!</h1>
+                <h1 id="hello-text">Hello, World!</h1>
             </div>
         );
     }
