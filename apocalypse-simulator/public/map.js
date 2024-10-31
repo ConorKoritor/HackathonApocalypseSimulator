@@ -4,7 +4,7 @@ let tick = 0;
 setInterval(() => {
     tick += 1;
     d3.select('#vis').call(hexmap(tick));
-}, 500);
+}, 100);
 
 function hexmap(tick) {
     //________________________________________________
@@ -23,7 +23,7 @@ function hexmap(tick) {
 
     var hexbin = d3.hexbin()
         .size([opts.width, opts.height])
-        .radius(1.66666666667);
+        .radius(0.83333333333);
 
     var color = d3.scaleLinear()
         .domain([1, 255])
@@ -106,7 +106,7 @@ function hexmap(tick) {
                 hexagonGroup.enter()
                     .append('path')
                     .attr('class', 'hexagons')
-                    .attr('d', hexbin.hexagon(1.5))
+                    .attr('d', hexbin.hexagon(.75))
                     .style('fill', function (d) {
                         return getColor(d, tick);
                     })
@@ -130,16 +130,18 @@ function hexmap(tick) {
         // Only color land
         if (d.mean > 0) {
             // Define infected area
-            var epicenter_x = 100;
-            var epicenter_y = 100;
-            var time_passed = 3 * tick;
-            var spread_rate = 3 * time_passed;
+            var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
+            var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
+            var time_passed = 1 * tick;
+            var spread_rate = 2 * time_passed;
 
-            // Color infected area
+            // Add randomness to the distance
             var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
+            var randomVariation = Math.random() * 30; // Random spread variation
 
-            if (distance <= spread_rate) {
-                return '#FF0000'; // Inside the infected area (circle)
+            // Calculate effective distance with randomness
+            if (distance <= spread_rate + randomVariation) {
+                return '#FF0000'; // Inside the infected area (irregular circle)
             }
 
             return color(d.mean + 100);
