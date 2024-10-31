@@ -9,7 +9,7 @@ setInterval(() => {
     tick += 1;
     d3.select('#vis').call(hexmap(tick));
     d3.select('#map-text')
-        .html(`Infection Week: ${tick}<br>Active Epicenters: ${epicenters.length} <br>Infected: ${Math.round((dcount/22476) * 100) / 100}%`);
+        .html(`Infection Week: ${tick}<br>Active Epicenters: ${epicenters.length} <br>Infected Hexagons: ${dcount} <br><br>Spread Rates <br>Alaska/Canada/Greenland/Russia: 1.2 <br>US/Canada: 3 <br>South America: 5 <br>Europe: 4 <br>Africa: 5 <br>SE Asia/China: 6 <br>Australia: 2`);
 }, 100); // Update every 100 milliseconds
 
 function hexmap(tick) {
