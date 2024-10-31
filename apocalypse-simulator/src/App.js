@@ -12,7 +12,8 @@ class App extends Component {
     render() {
         return (
             <div>
-                <div id="vis"></div> {/* This is where the D3 visualization will be rendered */}
+                <div id="vis"></div>
+                <div id="map-text"></div>
             </div>
         );
     }

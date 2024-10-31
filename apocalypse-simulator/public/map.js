@@ -1,17 +1,18 @@
 let tick = 0;
-let infectedHexagons = new Set(); // Track infected hexagons
+let infectedHexagons = []; // Track infected hexagons
 var epicenters = [];
 epicenters.push([100, 100, 1]);
-
+var dcount = 0;
 
 // Apply the chart to the DOM
 setInterval(() => {
     tick += 1;
     d3.select('#vis').call(hexmap(tick));
+    d3.select('#map-text')
+        .html(`Infection Week: ${tick}<br>Active Epicenters: ${epicenters.length} <br>Infected: ${Math.round((dcount/22476) * 100) / 100}%`);
 }, 100); // Update every 100 milliseconds
 
 function hexmap(tick) {
-
     epicenters = determineEpicenters(epicenters);
 
     for(var i = 0; i < epicenters.length; i++){
@@ -118,16 +119,25 @@ function hexmap(tick) {
                     .attr('class', 'hexagons')
                     .attr('d', hexbin.hexagon(1.5))
                     .style('fill', function (d) {
-                        return getColor(d, tick);
+                        var col = getColor(d, tick);
+                        if(col.localeCompare('#FF0000')){
+                            dcount++;
+                        }
+                        return col;
                     })
                     .merge(hexagonGroup) // Merge enter with existing hexagons
                     .attr('transform', function (d) {
                         return 'translate(' + d.x + ',' + d.y + ')';
                     })
                     .style('fill', function (d) {
-                        return getColor(d, tick);
+                        var col = getColor(d, tick);
+                        if(col.localeCompare('#FF0000')){
+                            dcount++;
+                        }
+                        return col;
                     });
 
+                console.log(dcount)
                 // Exit selection for hexagons that are no longer needed
                 hexagonGroup.exit().remove(); // Remove old hexagons
             })
@@ -141,19 +151,23 @@ function hexmap(tick) {
             // Only color land
             if (d.mean > 0) {
 
+                if (infectedHexagons.includes([d.x, d.y])){
+                    return '#FF0000';
+                }
+
                 for (var i = 0; i < epicenters.length; i++) {
                     // Define infected area
                     var epicenter_x = epicenters[i][0] + (Math.random() - 0.5) * 20; // Randomize epicenter x
                     var epicenter_y = epicenters[i][1] + (Math.random() - 0.5) * 20; // Randomize epicenter y
                     var time_passed = 1 * epicenters[i][2];
-                    var spread_rate = 2 * time_passed;
+                    var spread_rate = 20 * time_passed;
 
                     // Calculate distance from the hexagon to the randomized epicenter
                     var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
                     var randomVariation = Math.random() * 30; // Random spread variation
 
                     if (distance <= spread_rate + randomVariation) {
-                        infectedHexagons.add(d); // Add to infected set
+                        infectedHexagons.push([d.x, d.y]); // Add to infected set
                         return '#FF0000'; // Inside the infected area (irregular circle)}
                     }
                 }
