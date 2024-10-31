@@ -2,17 +2,19 @@
 
 
 let tick = 0;
+var hexagons = [];
 
 // Apply the chart to the DOM
+
+d3.select('#vis')
+.call(hexmap(tick));
+console.log("created");
 
 setInterval(() => {
     tick += 1;
     d3.select('#vis').selectAll('svg').remove();
     console.log("deleted");
-    d3.select('#vis')
-    .call(hexmap(tick));
-    console.log("created");
-}, 10000)
+}, 5000)
 
 
 function hexmap(tick) {
@@ -53,7 +55,6 @@ function hexmap(tick) {
 
         var context = canvas.node().getContext('2d');
         var points = [];
-        var hexagons = [];
 
         var projection = d3.geoMercator()
             .rotate([0, 0])
@@ -115,7 +116,7 @@ function hexmap(tick) {
                             // define infected area
                             var epicenter_x = 100;
                             var epicenter_y = 100;
-                            var time_passed = 3;
+                            var time_passed = tick;
                             var spread_rate = 3 * time_passed;
 
                             // colour infected area
