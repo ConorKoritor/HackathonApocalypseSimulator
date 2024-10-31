@@ -2,6 +2,7 @@ let tick = 0;
 let infectedHexagons = new Set(); // Track infected hexagons
 var epicenters = [];
 epicenters.push([100, 100]);
+epicenters.push([500, 500]);
 
 // Apply the chart to the DOM
 setInterval(() => {
@@ -13,6 +14,10 @@ function hexmap(tick) {
     //________________________________________________
     // GET/SET defaults
     //________________________________________________
+
+    
+            //Check for new Epicenters
+            //epicenters = determineEpicenters(epicenters);
 
     // Private variables
     var dispatch = d3.dispatch('customHover');
@@ -118,6 +123,7 @@ function hexmap(tick) {
                         return 'translate(' + d.x + ',' + d.y + ')';
                     })
                     .style('fill', function (d) {
+                        
                         return getColor(d, tick);
                     });
 
@@ -132,9 +138,7 @@ function hexmap(tick) {
     function getColor(d, tick) {
         // Only color land
         if (d.mean > 0) {
-            //Check for new Epicenters
-            epicenters = determineEpicenters(epicenters);
-
+            for()
             //Loop through all epicenters
             epicenters.forEach(function(epicenter){
             // Define infected area
@@ -165,7 +169,7 @@ function hexmap(tick) {
 
 function determineEpicenters(epicenters){
 
-    if(Math.random(0,100) <= 10){
+    if(Math.random() * 100 <= 10){
         var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
         var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
 
