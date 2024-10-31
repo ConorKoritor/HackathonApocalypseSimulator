@@ -98,13 +98,22 @@ function hexmap() {
                         console.log(
                             d
                         )
+                        // this is colouring only land
                         if(d.mean > 0){
+                            // define infected area
+                            var epicenter_x = 100;
+                            var epicenter_y = 100;
+                            var time_passed = 5;
+                            var spread_rate = 5 * time_passed;
 
-                            // this is colouring only land
+                            // colour infected area
+                            var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
+
+                            if (distance <= spread_rate) {
+                                return '#FF0000'; // Inside the infected area (circle)
+                            }
 
                             return color(d.mean+100);
-
-
                         }
                         return color(0);
                     });
