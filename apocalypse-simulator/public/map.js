@@ -1,7 +1,8 @@
 let tick = 0;
 let infectedHexagons = new Set(); // Track infected hexagons
 var epicenters = [];
-epicenters.push([100, 100]);
+epicenters.push([100, 100, 1]);
+
 
 // Apply the chart to the DOM
 setInterval(() => {
@@ -10,6 +11,12 @@ setInterval(() => {
 }, 100); // Update every 100 milliseconds
 
 function hexmap(tick) {
+
+    epicenters = determineEpicenters(epicenters);
+
+    for(var i = 0; i < epicenters.length; i++){
+        epicenters[i][2]++
+    }
     //________________________________________________
     // GET/SET defaults
     //________________________________________________
@@ -130,27 +137,31 @@ function hexmap(tick) {
     }
 
     function getColor(d, tick) {
-        // Only color land
-        if (d.mean > 0) {
-            // Define infected area
-            var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
-            var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
-            var time_passed = 1 * tick;
-            var spread_rate = 2 * time_passed;
 
-            // Calculate distance from the hexagon to the randomized epicenter
-            var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
-            var randomVariation = Math.random() * 30; // Random spread variation
+            // Only color land
+            if (d.mean > 0) {
 
-            // Calculate effective distance with randomness
-            if (distance <= spread_rate + randomVariation) {
-                infectedHexagons.add(d); // Add to infected set
-                return '#FF0000'; // Inside the infected area (irregular circle)
+                for (var i = 0; i < epicenters.length; i++) {
+                    // Define infected area
+                    var epicenter_x = epicenters[i][0] + (Math.random() - 0.5) * 20; // Randomize epicenter x
+                    var epicenter_y = epicenters[i][1] + (Math.random() - 0.5) * 20; // Randomize epicenter y
+                    var time_passed = 1 * epicenters[i][2];
+                    var spread_rate = 2 * time_passed;
+
+                    // Calculate distance from the hexagon to the randomized epicenter
+                    var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
+                    var randomVariation = Math.random() * 30; // Random spread variation
+
+                    if (distance <= spread_rate + randomVariation) {
+                        infectedHexagons.add(d); // Add to infected set
+                        return '#FF0000'; // Inside the infected area (irregular circle)}
+                    }
+                }
+
+                return color(d.mean + 100);
             }
-
-            return color(d.mean + 100);
-        }
         return color(0);
+
     }
 
     // Export the function
@@ -159,12 +170,11 @@ function hexmap(tick) {
 
 function determineEpicenters(epicenters){
 
-    if(Math.random(0,100) <= 10){
-        var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
-        var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
+    if(Math.random() * 100 <= 50){
+        var epicenter_x = Math.random() * 960; // Randomize epicenter x
+        var epicenter_y = Math.random() * 500; // Randomize epicenter y
 
-        epicenters.push([epicenter_x, epicenter_y]);
-
+        epicenters.push([epicenter_x, epicenter_y, 1]);
     }
 
     return epicenters;
