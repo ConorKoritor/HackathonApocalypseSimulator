@@ -1,4 +1,6 @@
 let tick = 0;
+var epicenters = [];
+epicenters.push([100, 100]);
 
 // Apply the chart to the DOM
 setInterval(() => {
@@ -129,11 +131,17 @@ function hexmap(tick) {
     function getColor(d, tick) {
         // Only color land
         if (d.mean > 0) {
+            //Determine Epicenters
+            epicenters = determineEpicenters(epicenters);
+
             // Define infected area
-            var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
-            var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
+            epicenters.forEach(function (epicenter) {
+
+            var epicenter_x = epicenter[0]; //random epicenter x
+            var epicenter_y = epicenter[1]; //random epicenter y
             var time_passed = 1 * tick;
             var spread_rate = 2 * time_passed;
+
 
             // Add randomness to the distance
             var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
@@ -143,6 +151,7 @@ function hexmap(tick) {
             if (distance <= spread_rate + randomVariation) {
                 return '#FF0000'; // Inside the infected area (irregular circle)
             }
+        });
 
             return color(d.mean + 100);
         }
@@ -151,4 +160,17 @@ function hexmap(tick) {
 
     // Export the function
     return exports;
+}
+
+function determineEpicenters(epicenters){
+
+    if(Math.random(0,100) <= 10){
+        var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
+        var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
+
+        epicenters.push([epicenter_x, epicenter_y]);
+
+    }
+
+    return epicenters;
 }
