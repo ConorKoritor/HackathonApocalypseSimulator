@@ -24,7 +24,7 @@ function hexmap(tick) {
 
     var hexbin = d3.hexbin()
         .size([opts.width, opts.height])
-        .radius(0.83333333333);
+        .radius(1.66666666666);
 
     var color = d3.scaleLinear()
         .domain([1, 255])
@@ -107,7 +107,7 @@ function hexmap(tick) {
                 hexagonGroup.enter()
                     .append('path')
                     .attr('class', 'hexagons')
-                    .attr('d', hexbin.hexagon(.75))
+                    .attr('d', hexbin.hexagon(1.5))
                     .style('fill', function (d) {
                         return getColor(d, tick);
                     })
