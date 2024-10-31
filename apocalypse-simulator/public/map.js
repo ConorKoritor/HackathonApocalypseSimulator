@@ -132,9 +132,14 @@ function hexmap(tick) {
     function getColor(d, tick) {
         // Only color land
         if (d.mean > 0) {
+            //Check for new Epicenters
+            epicenters = determineEpicenters(epicenters);
+
+            //Loop through all epicenters
+            epicenters.forEach(function(epicenter){
             // Define infected area
-            var epicenter_x = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter x
-            var epicenter_y = 100 + (Math.random() - 0.5) * 20; // Randomize epicenter y
+            var epicenter_x = epicenter[0] // Randomize epicenter x
+            var epicenter_y = epicenter[1] // Randomize epicenter y
             var time_passed = 1 * tick;
             var spread_rate = 2 * time_passed;
 
@@ -149,6 +154,7 @@ function hexmap(tick) {
             }
 
             return color(d.mean + 100);
+        });
         }
         return color(0);
     }
