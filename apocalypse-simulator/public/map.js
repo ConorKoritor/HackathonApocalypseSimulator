@@ -1,27 +1,17 @@
-
-
-
 let tick = 0;
 
 // Apply the chart to the DOM
-
 setInterval(() => {
     tick += 1;
-    d3.select('#vis').selectAll('svg').remove();
-    console.log("deleted");
-    d3.select('#vis')
-    .call(hexmap(tick));
-    console.log("created");
-}, 10000)
-
+    d3.select('#vis').call(hexmap(tick));
+}, 500);
 
 function hexmap(tick) {
     //________________________________________________
     // GET/SET defaults
     //________________________________________________
-    
+
     // Private variables
-    var svg = undefined;
     var dispatch = d3.dispatch('customHover');
 
     // Getter setter defaults
@@ -35,7 +25,7 @@ function hexmap(tick) {
         .size([opts.width, opts.height])
         .radius(1.66666666667);
 
-    var color = d3.scaleLinear() // Update to d3.scaleLinear for D3 v5+
+    var color = d3.scaleLinear()
         .domain([1, 255])
         .range(['#fff', '#e5e5e5'])
         .interpolate(d3.interpolateHcl);
@@ -45,13 +35,23 @@ function hexmap(tick) {
     //________________________________________________
 
     function exports(_selection) {
-        var canvas = _selection
+        // Append canvas for drawing the map
+        var canvas = _selection.selectAll('canvas').data([0]);
+
+        // Enter selection: create canvas if not exists
+        var canvasEnter = canvas.enter()
             .append('canvas')
             .attr('width', opts.width)
             .attr('height', opts.height)
             .attr('id', 'mapCanvas');
 
-        var context = canvas.node().getContext('2d');
+        canvas = canvasEnter.merge(canvas); // Merge enter and update selections
+
+        var context = canvas.node().getContext('2d'); // Get context of the canvas
+
+        // Clear previous frame
+        context.clearRect(0, 0, opts.width, opts.height);
+
         var points = [];
         var hexagons = [];
 
@@ -73,13 +73,11 @@ function hexmap(tick) {
                 path(topojson.feature(world, world.objects.land));
                 context.fill();
 
-                var image = document.getElementById('mapCanvas');
-                context.drawImage(image, 0, 0, opts.width, opts.height);
-                image = context.getImageData(0, 0, opts.width, opts.height);
+                var image = context.getImageData(0, 0, opts.width, opts.height);
 
                 // Rescale the colors
-                for (var c, i = 0, n = opts.width * opts.height * 4, d = image.data; i < n; i += 4) {
-                    points.push([i / 4 % opts.width, Math.floor(i / 4 / opts.width), d[i]]);
+                for (var i = 0, n = opts.width * opts.height * 4; i < n; i += 4) {
+                    points.push([i / 4 % opts.width, Math.floor(i / 4 / opts.width), image.data[i]]);
                 }
 
                 hexagons = hexbin(points);
@@ -89,56 +87,66 @@ function hexmap(tick) {
                     });
                 });
 
-                var svg = _selection.append('svg')
+                // Handle SVG overlay for hexagons
+                var svg = _selection.selectAll('svg').data([0]);
+
+                // Enter selection: create SVG if not exists
+                var svgEnter = svg.enter()
+                    .append('svg')
                     .attr('width', opts.width)
-                    .attr('height', opts.height);
+                    .attr('height', opts.height)
+                    .attr('id', 'hexSvg');
 
-             var countries = topojson.feature(world, world.objects.countries).features
+                svg = svgEnter.merge(svg); // Merge enter and update selections
 
-                var hexagon = svg.append('g')
-                    .attr('class', 'hexagons')
-                    .selectAll('path')
-                    .data(hexagons)
-                    .enter()
+                // Join hexagon data
+                var hexagonGroup = svg.selectAll('.hexagons').data(hexagons);
+
+                // Enter selection for new hexagons
+                hexagonGroup.enter()
                     .append('path')
+                    .attr('class', 'hexagons')
                     .attr('d', hexbin.hexagon(1.5))
+                    .style('fill', function (d) {
+                        return getColor(d, tick);
+                    })
+                    .merge(hexagonGroup) // Merge enter with existing hexagons
                     .attr('transform', function (d) {
                         return 'translate(' + d.x + ',' + d.y + ')';
                     })
                     .style('fill', function (d) {
-                        console.log(
-                            d,
-                            tick
-                        )
-                        // this is colouring only land
-                        if(d.mean > 0){
-                            // define infected area
-                            var epicenter_x = 100;
-                            var epicenter_y = 100;
-                            var time_passed = 3;
-                            var spread_rate = 3 * time_passed;
-
-                            // colour infected area
-                            var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
-
-                            if (distance <= spread_rate) {
-                                return '#FF0000'; // Inside the infected area (circle)
-                            }
-
-                            return color(d.mean+100);
-                        }
-                        return color(0);
+                        return getColor(d, tick);
                     });
 
-
-                    
+                // Exit selection for hexagons that are no longer needed
+                hexagonGroup.exit().remove(); // Remove old hexagons
             })
             .catch(function (error) {
                 console.error('Error loading the world data:', error);
             });
     }
 
+    function getColor(d, tick) {
+        // Only color land
+        if (d.mean > 0) {
+            // Define infected area
+            var epicenter_x = 100;
+            var epicenter_y = 100;
+            var time_passed = 3 * tick;
+            var spread_rate = 3 * time_passed;
+
+            // Color infected area
+            var distance = Math.sqrt((d.x - epicenter_x) ** 2 + (d.y - epicenter_y) ** 2);
+
+            if (distance <= spread_rate) {
+                return '#FF0000'; // Inside the infected area (circle)
+            }
+
+            return color(d.mean + 100);
+        }
+        return color(0);
+    }
+
     // Export the function
     return exports;
-
 }
